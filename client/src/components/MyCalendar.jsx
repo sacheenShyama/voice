@@ -44,7 +44,7 @@ const myEventsList = [
     isAllDay: true, // Optional field useful for some calendar libraries
   },
 ];
-const MyCalendar = (props) => {
+const MyCalendar = () => {
   const [events, setEvents] = useState(myEventsList);
   const [selectedDate, setSelectedDate] = useState(null);
   const [isOpenEvent, setIsOpenEvent] = useState(false);
@@ -52,17 +52,32 @@ const MyCalendar = (props) => {
   // const [modalState,setModalState]=useState(false)
 
   const handleSelectEvent = (event) => {
-    console.log(event);
     setSelectedDate(null);
-    setIsOpenEvent(event);
+    setSelectedEvent(event);
     setIsOpenEvent(true);
   };
 
   const handleSelectSlot = (slotInfo) => {
-    console.log(slotInfo);
     setSelectedDate(slotInfo.start);
     setIsOpenEvent(null);
     setIsOpenEvent(true);
+  };
+
+  const handleSaveEvent = (e) => {
+    console.log("onSAve", e);
+    if (e.id) {
+      setEvents((prev) => prev.map((ev) => (ev.id === e.id ? e : ev)));
+    } else {
+      const newEvent = {
+        ...e,
+        id: events.length + 1,
+      };
+      setEvents((prev) => [...prev, newEvent]);
+    }
+
+    setIsOpenEvent(false);
+    setSelectedDate(null);
+    setSelectedEvent(null);
   };
 
   return (
@@ -79,7 +94,15 @@ const MyCalendar = (props) => {
           onSelectEvent={handleSelectEvent}
         />
       </div>
-      {isOpenEvent && <Modal setIsOpenEvent={setIsOpenEvent} isOpenEvent={isOpenEvent}/>}
+      {isOpenEvent && (
+        <Modal
+          setIsOpenEvent={setIsOpenEvent}
+          isOpenEvent={isOpenEvent}
+          onSave={handleSaveEvent}
+          date={selectedDate}
+          event={selectedEvent}
+        />
+      )}
     </>
   );
 };

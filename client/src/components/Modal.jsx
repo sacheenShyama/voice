@@ -6,17 +6,43 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function Modal({ isOpenEvent, setIsOpenEvent }) {
+export default function Modal({
+  isOpenEvent,
+  setIsOpenEvent,
+  onSave,
+  date,
+  event,
+}) {
   const [title, setTitle] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
+  useEffect(() => {
+    console.log("event", event, date);
+    if (event) {
+      setTitle(event.title || " ");
+      setStart(event.start.toISOString().slice(0, 16));
+      setEnd(event.end.toISOString().slice(0, 16));
+    } else if (date) {
+      const defaultStart = new Date(date);
+      const defaultEnd = new Date(defaultStart.getTime() + 60 * 60 * 1000); // 1 hour later
+      setStart(defaultStart.toISOString().slice(0, 16));
+      setEnd(defaultEnd.toISOString().slice(0, 16));
+      setTitle("");
+    }
+  }, [date, event]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("form submit", e);
+    onSave({
+      id: event?.id,
+      title,
+      start: new Date(start),
+      end: new Date(end),
+    });
     setIsOpenEvent(false);
   };
   return (
@@ -70,7 +96,7 @@ export default function Modal({ isOpenEvent, setIsOpenEvent }) {
                       Start Date:
                     </label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       value={start}
                       name="start"
                       id="start"
@@ -83,7 +109,7 @@ export default function Modal({ isOpenEvent, setIsOpenEvent }) {
                       End Date:
                     </label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       value={end}
                       name="end"
                       id="end"
